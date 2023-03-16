@@ -94,10 +94,10 @@ const modifyAppDelegate: ConfigPlugin = (config) => {
   const modifyContents = (contents: string): string => {
     if (!contents.includes(KAKAO_HEADER_IMPORT_STRING)) {
       contents = contents.replace(
-        '#if',
-        `
-      ${KAKAO_HEADER_IMPORT_STRING}
-      #if`,
+        "@implementation AppDelegate",
+        `${KAKAO_HEADER_IMPORT_STRING}
+
+@implementation AppDelegate`
       );
     }
 
