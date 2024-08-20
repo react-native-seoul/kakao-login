@@ -14,7 +14,7 @@ import KakaoSDKUser
 
 @objc(RNKakaoLogins)
 class RNKakaoLogins: NSObject {
-
+    
     public override init() {
         let appKey: String? = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String
         let customScheme: String? = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_SCHEME") as? String
@@ -24,36 +24,37 @@ class RNKakaoLogins: NSObject {
             KakaoSDK.initSDK(appKey: appKey!)
         }
     }
-
+    
     @objc
     static func requiresMainQueueSetup() -> Bool {
-      return true
+        return true
     }
-
+    
     @objc(isKakaoTalkLoginUrl:)
     public static func isKakaoTalkLoginUrl(url:URL) -> Bool {
-
+        
         let appKey = try? KakaoSDK.shared.appKey();
-
+        
         if (appKey != nil) {
             return AuthApi.isKakaoTalkLoginUrl(url)
         }
         return false
     }
-
+    
     @objc(handleOpenUrl:)
     public static func handleOpenUrl(url:URL) -> Bool {
         return AuthController.handleOpenUrl(url: url)
     }
-
+    
     @objc(login:rejecter:)
-    func login(_ resolve: @escaping RCTPromiseResolveBlock,
-                rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+    func login(_ scopes: [String],
+               resolver resolve: @escaping RCTPromiseResolveBlock,
+               rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss";
 
-            if (UserApi.isKakaoTalkLoginAvailable()) {
+            if (scopes.isEmpty && UserApi.isKakaoTalkLoginAvailable()) {
                 UserApi.shared.loginWithKakaoTalk {(oauthToken, error) in
                     if let error = error {
                         reject("RNKakaoLogins", error.localizedDescription, nil)
@@ -70,7 +71,7 @@ class RNKakaoLogins: NSObject {
                     }
                 }
             } else {
-                UserApi.shared.loginWithKakaoAccount {(oauthToken, error) in
+                UserApi.shared.loginWithKakaoAccount(scopes: scopes) {(oauthToken, error) in
                     if let error = error {
                         reject("RNKakaoLogins", error.localizedDescription, nil)
                     }
@@ -88,14 +89,15 @@ class RNKakaoLogins: NSObject {
             }
         }
     }
-
-    @objc(loginWithKakaoAccount:rejecter:)
-    func loginWithKakaoAccount(_ resolve: @escaping RCTPromiseResolveBlock,
-                rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+    
+    @objc(loginWithKakaoAccount:resolver:rejecter:)
+    func loginWithKakaoAccount(_ scopes: [String],
+                               resolver resolve: @escaping RCTPromiseResolveBlock,
+                               rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss";
-            UserApi.shared.loginWithKakaoAccount {(oauthToken, error) in
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss";
+            UserApi.shared.loginWithKakaoAccount(scopes: scopes) {(oauthToken, error) in
                 if let error = error {
                     reject("RNKakaoLogins", error.localizedDescription, nil)
                 }
@@ -112,10 +114,10 @@ class RNKakaoLogins: NSObject {
             }
         }
     }
-
+    
     @objc(logout:rejecter:)
     func logout(_ resolve: @escaping RCTPromiseResolveBlock,
-               rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+                rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             UserApi.shared.logout {(error) in
                 if let error = error {
@@ -127,10 +129,10 @@ class RNKakaoLogins: NSObject {
             }
         }
     }
-
+    
     @objc(unlink:rejecter:)
     func unlink(_ resolve: @escaping RCTPromiseResolveBlock,
-               rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+                rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             UserApi.shared.unlink {(error) in
                 if let error = error {
@@ -142,10 +144,10 @@ class RNKakaoLogins: NSObject {
             }
         }
     }
-
+    
     @objc(getAccessToken:rejecter:)
     func getAccessToken(_ resolve: @escaping RCTPromiseResolveBlock,
-               rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+                        rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             UserApi.shared.accessTokenInfo {(accessTokenInfo, error) in
                 if let error = error {
@@ -160,10 +162,10 @@ class RNKakaoLogins: NSObject {
             }
         }
     }
-
+    
     @objc(getProfile:rejecter:)
     func getProfile(_ resolve: @escaping RCTPromiseResolveBlock,
-               rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+                    rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             UserApi.shared.me() {(user, error) in
                 if let error = error {
@@ -199,14 +201,14 @@ class RNKakaoLogins: NSObject {
             }
         }
     }
-
+    
     @objc(shippingAddresses:rejecter:)
     func shippingAddresses(_ resolve: @escaping RCTPromiseResolveBlock,
-               rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+                           rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss";
-
+            
             UserApi.shared.shippingAddresses() {(shippingAddresses, error) in
                 if let error = error {
                     reject("RNKakaoLogins", error.localizedDescription, nil)
@@ -234,10 +236,10 @@ class RNKakaoLogins: NSObject {
             }
         }
     }
-
+    
     @objc(serviceTerms:rejecter:)
     func serviceTerms(_ resolve: @escaping RCTPromiseResolveBlock,
-                rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+                      rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         DispatchQueue.main.async {
             UserApi.shared.serviceTerms {(userServiceTerms, error) in
                 if let error = error {
@@ -246,13 +248,13 @@ class RNKakaoLogins: NSObject {
                 else {
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-
+                    
                     var result: [String: Any] = [:]
-
+                    
                     if let useId = userServiceTerms?.id {
                         result["userId"] = useId
                     }
-
+                    
                     if let serviceTerms = userServiceTerms?.serviceTerms {
                         result["serviceTerms"] = serviceTerms.map {
                             var terms = [
@@ -261,15 +263,15 @@ class RNKakaoLogins: NSObject {
                                 "required": $0.required,
                                 "revocable": $0.revocable
                             ]
-
+                            
                             if let agreedAt = $0.agreedAt {
                                 terms["agreedAt"] = dateFormatter.string(from: agreedAt)
                             }
-
+                            
                             return terms
                         }
                     }
-
+                    
                     resolve(result)
                 }
             }

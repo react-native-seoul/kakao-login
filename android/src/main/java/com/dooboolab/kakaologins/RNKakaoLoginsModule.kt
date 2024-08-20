@@ -21,8 +21,8 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
     }
 
     @ReactMethod
-    private fun login(promise: Promise) {
-        if (UserApiClient.instance.isKakaoTalkLoginAvailable(reactContext)) {
+    private fun login(scopes: Array<String>, promise: Promise) {
+        if (scopes.isEmpty() && UserApiClient.instance.isKakaoTalkLoginAvailable(reactContext)) {
             reactContext.currentActivity?.let {
                 UserApiClient.instance.loginWithKakaoTalk(it) { token, error: Throwable? ->
                     if (error != null) {
@@ -57,10 +57,10 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
                 }
             }
         } else {
-            UserApiClient.instance.loginWithKakaoAccount(reactContext) { token, error: Throwable? ->
+            UserApiClient.instance.loginWithNewScopes(reactContext, scopes.toList()) { token, error: Throwable? ->
                 if (error != null) {
                     promise.reject("RNKakaoLogins", error.message, error)
-                    return@loginWithKakaoAccount
+                    return@loginWithNewScopes
                 }
 
                 if (token != null) {
@@ -79,7 +79,7 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
                     }
                     map.putArray("scopes", scopeArray)
                     promise.resolve(map)
-                    return@loginWithKakaoAccount
+                    return@loginWithNewScopes
                 }
 
                 promise.reject("RNKakaoLogins", "Token is null")
@@ -88,16 +88,16 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
     }
 
     @ReactMethod
-    private fun loginWithKakaoAccount(promise: Promise) {
-        UserApiClient.instance.loginWithKakaoAccount(reactContext) { token, error: Throwable? ->
+    private fun loginWithKakaoAccount(scopes: Array<String>, promise: Promise) {
+        UserApiClient.instance.loginWithNewScopes(reactContext, scopes.toList()) { token, error: Throwable? ->
             if (error != null) {
                 promise.reject("RNKakaoLogins", error.message, error)
-                return@loginWithKakaoAccount
+                return@loginWithNewScopes
             }
 
             if (token == null) {
                 promise.reject("RNKakaoLogins", "Token is null")
-                return@loginWithKakaoAccount
+                return@loginWithNewScopes
             }
 
             if (token != null) {
@@ -116,7 +116,7 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
                 }
                 map.putArray("scopes", scopeArray)
                 promise.resolve(map)
-                return@loginWithKakaoAccount
+                return@loginWithNewScopes
             }
         }
     }

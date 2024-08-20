@@ -1,14 +1,16 @@
 import {NativeModules} from 'react-native';
-import {KakaoLoginModuleInterface} from './types';
+import {KakaoAccountLoginProps, KakaoLoginModuleInterface} from './types';
 
 const {RNKakaoLogins} = NativeModules;
 
 const NativeKakaoLogins: KakaoLoginModuleInterface = {
-  login() {
-    return RNKakaoLogins.login();
+  login(props) {
+    return RNKakaoLogins.login(
+      (props as KakaoAccountLoginProps | undefined)?.scopes ?? [],
+    );
   },
-  loginWithKakaoAccount() {
-    return RNKakaoLogins.loginWithKakaoAccount();
+  loginWithKakaoAccount(props) {
+    return RNKakaoLogins.loginWithKakaoAccount(props?.scopes ?? []);
   },
   logout() {
     return RNKakaoLogins.logout();

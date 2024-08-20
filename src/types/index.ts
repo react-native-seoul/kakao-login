@@ -1,5 +1,5 @@
 export interface KakaoLoginModuleInterface {
-  login(): Promise<KakaoOAuthToken>;
+  login(props: KakaoAccountLoginProps): Promise<KakaoOAuthToken>;
   login(props: KaKaoLoginWebType): Promise<KakaoOAuthWebToken>;
 
   logout(): Promise<string>;
@@ -13,7 +13,9 @@ export interface KakaoLoginModuleInterface {
 
   getAccessToken(): Promise<KakaoAccessTokenInfo>;
 
-  loginWithKakaoAccount(): Promise<KakaoOAuthToken>;
+  loginWithKakaoAccount(
+    props?: KakaoAccountLoginProps,
+  ): Promise<KakaoOAuthToken>;
 
   shippingAddresses(): Promise<KakaoShippingAddresses>;
 
@@ -129,4 +131,8 @@ export declare type KakaoServiceTerms = {
 export declare type KakaoUserServiceTerms = {
   userId?: number;
   serviceTerms?: KakaoServiceTerms[];
+};
+
+export type KakaoAccountLoginProps = {
+  scopes?: string[];
 };
